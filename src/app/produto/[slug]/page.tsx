@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { ProductGrid } from "@/components/ProductCard";
+import { ProductSkeleton } from "@/components/Skeleton";
 import { getCategory, getProduct, getStore, products, tags, unsplash } from "@/data/catalog";
 import { formatPrice } from "@/lib/format";
 import { discount } from "@/lib/search";
@@ -22,7 +24,17 @@ export async function generateMetadata({ params }: PageProps<"/produto/[slug]">)
   };
 }
 
-export default async function ProdutoPage({ params }: PageProps<"/produto/[slug]">) {
+// A moldura entra no shell instantâneo; o conteúdo depende do endereço
+// (params) e fica atrás do <Suspense>.
+export default function ProdutoPage({ params }: PageProps<"/produto/[slug]">) {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-10"><ProductSkeleton /></div>}>
+      <ProdutoContent params={params} />
+    </Suspense>
+  );
+}
+
+async function ProdutoContent({ params }: { params: PageProps<"/produto/[slug]">["params"] }) {
   const p = getProduct((await params).slug);
   if (!p) notFound();
   const cat = getCategory(p.category)!;

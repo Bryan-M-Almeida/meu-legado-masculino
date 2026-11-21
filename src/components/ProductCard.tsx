@@ -26,7 +26,7 @@ export function ProductCard({ product: p, priority = false }: { product: Product
       <div className="flex flex-1 flex-col gap-2 p-3">
         <p className="text-sm text-slate">{getStore(p.store).name}</p>
         <h3 className="product-title font-bold leading-snug line-clamp-2">
-          <Link href={`/produto/${p.slug}`} className="after:absolute after:inset-0">
+          <Link href={`/produto/${p.slug}`} prefetch className="after:absolute after:inset-0">
             {p.title}
           </Link>
         </h3>

@@ -47,7 +47,7 @@ export function Header() {
         <ul className="mx-auto max-w-7xl px-4 flex gap-1 overflow-x-auto scroll-x text-sm">
           {categories.map((c) => (
             <li key={c.slug} className="shrink-0">
-              <Link href={`/categoria/${c.slug}`} className="block px-3 py-2 hover:bg-blue hover:text-white">
+              <Link href={`/categoria/${c.slug}`} prefetch className="block px-3 py-2 hover:bg-blue hover:text-white">
                 {c.name}
               </Link>
             </li>
