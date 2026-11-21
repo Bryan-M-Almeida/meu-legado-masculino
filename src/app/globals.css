@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+/*
+ * Paleta Sweetie-16 (uma paleta clássica de pixel art).
+ * O fundo é claro e o conteúdo respira: o "pixel" aparece nas bordas,
+ * sombras duras, tipografia de títulos e no mascote. O resto fica limpo.
+ */
+:root {
+  --ink: #1a1c2c;
+  --plum: #5d275d;
+  --crimson: #b13e53;
+  --sunset: #ef7d57;
+  --gold: #ffcd75;
+  --lime: #a7f070;
+  --green: #38b764;
+  --navy: #29366f;
+  --blue: #3b5dc9;
+  --sky: #41a6f6;
+  --paper: #f4f4f4;
+  --mist: #94b0c2;
+  --slate: #566c86;
+  --charcoal: #333c57;
+  --surface: #ffffff;
+  --px: 3px; /* espessura de borda = 1 "pixel" da interface */
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-plum: var(--plum);
+  --color-crimson: var(--crimson);
+  --color-sunset: var(--sunset);
+  --color-gold: var(--gold);
+  --color-lime: var(--lime);
+  --color-green: var(--green);
+  --color-navy: var(--navy);
+  --color-blue: var(--blue);
+  --color-sky: var(--sky);
+  --color-paper: var(--paper);
+  --color-mist: var(--mist);
+  --color-slate: var(--slate);
+  --color-charcoal: var(--charcoal);
+  --color-surface: var(--surface);
+  --font-pixel: var(--font-pixelify);
+  --font-sans: var(--font-atkinson);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-atkinson), system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fundo em grade de pixels bem sutil */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(26 28 44 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(26 28 44 / 0.045) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.font-pixel {
+  font-family: var(--font-pixelify), monospace;
+  letter-spacing: 0.01em;
+}
+
+img,
+svg {
+  image-rendering: pixelated;
+}
+img.photo {
+  image-rendering: auto;
+}
+
+:focus-visible {
+  outline: var(--px) solid var(--blue);
+  outline-offset: 3px;
+}
+
+/* ── Molduras de pixel ───────────────────────────────────────────
+   Cantos "mordidos" de 1 pixel, como nas janelas de jogos de 16 bits. */
+.px-frame {
+  border: var(--px) solid var(--ink);
+  box-shadow: 5px 5px 0 0 var(--ink);
+  background: var(--surface);
+}
+
+.px-cut {
+  clip-path: polygon(
+    0 var(--px), var(--px) var(--px), var(--px) 0,
+    calc(100% - var(--px)) 0, calc(100% - var(--px)) var(--px), 100% var(--px),
+    100% calc(100% - var(--px)), calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--px)) 100%,
+    var(--px) 100%, var(--px) calc(100% - var(--px)), 0 calc(100% - var(--px))
+  );
+}
+
+/* Botão que "afunda" ao clicar, como um botão de fliperama */
+.px-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-family: var(--font-pixelify), monospace;
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 0.7rem 1.25rem;
+  border: var(--px) solid var(--ink);
+  box-shadow: 0 5px 0 0 var(--ink);
+  transform: translateY(0);
+  transition: transform 80ms steps(2), box-shadow 80ms steps(2);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.px-btn:hover {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 0 var(--ink);
+}
+.px-btn:active {
+  transform: translateY(5px);
+  box-shadow: 0 0 0 0 var(--ink);
+}
+.px-btn-gold { background: var(--gold); color: var(--ink); }
+.px-btn-blue { background: var(--blue); color: #fff; }
+.px-btn-ink { background: var(--ink); color: var(--gold); box-shadow: 0 5px 0 0 var(--charcoal); }
+.px-btn-ink:hover { box-shadow: 0 3px 0 0 var(--charcoal); }
+.px-btn-ghost { background: var(--surface); color: var(--ink); }
+
+/* Card de produto: a borda acende em azul ao passar o mouse ou focar */
+.product-card {
+  border: var(--px) solid var(--ink);
+  background: var(--surface);
+  transition: border-color 0ms;
+}
+.product-card:hover,
+.product-card:focus-within {
+  border-color: var(--blue);
+}
+.product-card:hover .product-title {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+/* Etiqueta de preço com recorte de pixel */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-pixelify), monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.35rem 0.5rem;
+}
+
+/* ── Mascote ─────────────────────────────────────────────────── */
+.mascot {
+  position: relative;
+  display: inline-block;
+  animation: mascot-bob 1.2s steps(2) infinite;
+}
+.mascot > svg {
+  position: absolute;
+  inset: 0;
+}
+.mascot-blink {
+  opacity: 0;
+  animation: mascot-blink 4.5s steps(1) infinite;
+}
+@keyframes mascot-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes mascot-blink {
+  0%, 94% { opacity: 0; }
+  95%, 98% { opacity: 1; }
+  99%, 100% { opacity: 0; }
+}
+
+/* Cursor piscando da caixa de diálogo */
+.caret {
+  display: inline-block;
+  width: 0.6em;
+  height: 0.6em;
+  background: var(--gold);
+  margin-left: 0.25em;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  animation: caret 0.9s steps(1) infinite;
+}
+@keyframes caret {
+  50% { opacity: 0; }
+}
+
+/* Faixa GTA VI: pôr do sol com pontilhado (dithering) de pixel */
+.dither-sunset {
+  background:
+    radial-gradient(circle, rgb(26 28 44 / 0.35) 1px, transparent 1.5px) 0 0 / 6px 6px,
+    linear-gradient(180deg, var(--plum) 0%, var(--crimson) 45%, var(--sunset) 75%, var(--gold) 100%);
+}
+
+.scroll-x {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
