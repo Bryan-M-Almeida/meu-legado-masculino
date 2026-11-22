@@ -1,22 +1,15 @@
-import Image from "next/image";
 import Link from "next/link";
-import { getStore, tags, unsplash, type Product } from "@/data/catalog";
+import { getStore, tags, type Product } from "@/data/catalog";
 import { formatPrice } from "@/lib/format";
 import { discount } from "@/lib/search";
+import { ProductArt } from "./ProductArt";
 
 export function ProductCard({ product: p, priority = false }: { product: Product; priority?: boolean }) {
   const off = discount(p);
   return (
     <article className="product-card group relative flex flex-col h-full">
       <div className="relative aspect-square overflow-hidden border-b-[3px] border-ink bg-mist">
-        <Image
-          src={unsplash(p.image, 700)}
-          alt={p.imageAlt}
-          fill
-          sizes="(min-width: 1280px) 280px, (min-width: 768px) 30vw, 50vw"
-          className="photo object-cover"
-          priority={priority}
-        />
+        <ProductArt product={p} width={700} sizes="(min-width: 1280px) 280px, (min-width: 768px) 30vw, 50vw" priority={priority} />
         <div className="absolute left-0 top-0 flex flex-col items-start">
           {p.tags.includes("gta6") && <span className="tag bg-sunset text-ink">GTA VI</span>}
           {off > 0 && <span className="tag bg-crimson text-white">-{off}%</span>}

@@ -45,7 +45,11 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [75],
-    remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com", pathname: "/photo-**" }],
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com", pathname: "/photo-**" },
+      // Fotos reais de produtos com licença livre (domínio público ou Creative Commons).
+      { protocol: "https", hostname: "thumb.wikimedia.org", pathname: "/wikipedia/commons/**" },
+    ],
   },
   async headers() {
     return [

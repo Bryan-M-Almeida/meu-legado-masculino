@@ -4,6 +4,7 @@ import { categories, getProduct, products, unsplash, type Product } from "@/data
 import { DialogBox } from "@/components/DialogBox";
 import { Mascot } from "@/components/Mascot";
 import { PixelIcon, type IconName } from "@/components/PixelIcon";
+import { ProductArt } from "@/components/ProductArt";
 import { ProductGrid } from "@/components/ProductCard";
 
 const values: { icon: IconName; name: string; text: string }[] = [
@@ -108,7 +109,7 @@ export default function Home() {
               <li key={p.slug}>
                 <Link href={`/produto/${p.slug}`} className="product-card block">
                   <div className="relative aspect-[4/3] border-b-[3px] border-ink">
-                    <Image src={unsplash(p.image, 600)} alt={p.imageAlt} fill sizes="(min-width: 1024px) 320px, 45vw" className="photo object-cover" />
+                    <ProductArt product={p} width={600} sizes="(min-width: 1024px) 320px, 45vw" />
                   </div>
                   <p className="p-3 font-bold leading-snug line-clamp-2">{p.title}</p>
                 </Link>

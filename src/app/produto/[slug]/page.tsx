@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: PageProps<"/produto/[slug]">)
     title: p.title,
     description: p.summary,
     alternates: { canonical: `/produto/${p.slug}` },
-    openGraph: { title: p.title, description: p.summary, images: [unsplash(p.image, 1200)] },
+    openGraph: { title: p.title, description: p.summary, images: p.image ? [unsplash(p.image, 1200)] : undefined },
   };
 }
 
@@ -54,7 +54,7 @@ async function ProdutoContent({ params }: { params: PageProps<"/produto/[slug]">
       </nav>
 
       <div className="grid gap-10 md:grid-cols-2 items-start">
-        <ProductGallery photos={p.gallery} title={p.title} />
+        <ProductGallery product={p} />
 
         <div>
           <div className="flex flex-wrap gap-2">

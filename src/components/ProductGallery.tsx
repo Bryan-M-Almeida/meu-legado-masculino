@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import type { Photo } from "@/data/catalog";
-import { unsplash } from "@/data/catalog";
+import { getStore, photoFit, unsplash, type Product } from "@/data/catalog";
+import { ProductArt } from "./ProductArt";
 
 /**
  * Galeria da página do produto.
@@ -11,7 +11,9 @@ import { unsplash } from "@/data/catalog";
  * - Clique (ou toque): abre em tela cheia. Lá, clique para dar zoom e mova
  *   o mouse ou o dedo para percorrer a foto. Setas trocam de foto, Esc fecha.
  */
-export function ProductGallery({ photos, title }: { photos: Photo[]; title: string }) {
+export function ProductGallery({ product }: { product: Product }) {
+  const photos = product.gallery;
+  const title = product.title;
   const [index, setIndex] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -19,6 +21,22 @@ export function ProductGallery({ photos, title }: { photos: Photo[]; title: stri
   const bigImg = useRef<HTMLDivElement>(null);
   const photo = photos[index];
   const many = photos.length > 1;
+
+  // Sem foto do próprio modelo: mostra o cartão do produto, nunca uma foto genérica.
+  if (!photo) {
+    return (
+      <div>
+        <div className="px-frame overflow-hidden">
+          <div className="relative aspect-square">
+            <ProductArt product={product} width={1200} sizes="(min-width: 768px) 50vw, 100vw" priority />
+          </div>
+        </div>
+        <p className="mt-2 text-sm text-slate">
+          Ainda não temos uma foto deste modelo que possamos publicar. As fotos oficiais estão na página da {getStore(product.store).name}.
+        </p>
+      </div>
+    );
+  }
 
   const go = (to: number) => {
     setIndex((to + photos.length) % photos.length);
@@ -57,7 +75,7 @@ export function ProductGallery({ photos, title }: { photos: Photo[]; title: stri
               fill
               priority={index === 0}
               sizes="(min-width: 768px) 50vw, 100vw"
-              className="photo object-cover"
+              className={`photo ${photoFit(photo.id)}`}
             />
           </div>
           <span className="tag bg-ink text-paper absolute right-2 bottom-2 flex items-center gap-1.5 pointer-events-none">
@@ -79,13 +97,23 @@ export function ProductGallery({ photos, title }: { photos: Photo[]; title: stri
                   i === index ? "border-ink shadow-[3px_3px_0_var(--gold)]" : "border-mist hover:border-ink"
                 }`}
               >
-                <Image src={unsplash(ph.id, 200)} alt="" fill sizes="120px" className="photo object-cover" />
+                <Image src={unsplash(ph.id, 200)} alt="" fill sizes="120px" className={`photo ${photoFit(ph.id)}`} />
               </button>
             </li>
           ))}
         </ul>
       )}
-      <p className="mt-2 text-sm text-slate">Imagens ilustrativas. As fotos do produto estão na página da loja.</p>
+      {photo.credit ? (
+        <p className="mt-2 text-sm text-slate">
+          Foto do modelo; cor, versão e acessórios podem variar. Foto:{" "}
+          <a href={photo.credit.url} target="_blank" rel="noopener noreferrer" className="underline">
+            {photo.credit.author}, {photo.credit.license}
+          </a>
+          , via Wikimedia Commons.
+        </p>
+      ) : (
+        <p className="mt-2 text-sm text-slate">Imagem ilustrativa. As fotos do produto estão na página da loja.</p>
+      )}
 
       <dialog
         ref={dialog}
@@ -138,7 +166,7 @@ export function ProductGallery({ photos, title }: { photos: Photo[]; title: stri
                   aria-current={i === index}
                   className={`relative size-14 overflow-hidden border-[3px] ${i === index ? "border-gold" : "border-slate"}`}
                 >
-                  <Image src={unsplash(ph.id, 200)} alt="" fill sizes="56px" className="object-cover" />
+                  <Image src={unsplash(ph.id, 200)} alt="" fill sizes="56px" className={photoFit(ph.id)} />
                 </button>
               ))}
               <button type="button" onClick={() => go(index + 1)} className="px-btn px-btn-gold !py-1.5" aria-label="Próxima foto">

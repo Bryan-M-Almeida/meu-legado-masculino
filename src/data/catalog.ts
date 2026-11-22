@@ -3,11 +3,14 @@
  *
  * Sem banco de dados: todo produto vive aqui. Para adicionar um item, copie um
  * objeto da lista `drafts`, troque o `slug` (único), o `link` de afiliado e os textos.
- * O campo `kind` escolhe as fotos ilustrativas (veja `photoSets`).
+ * O campo `kind` diz o tipo do produto. Fotos ficam em productPhotos.ts.
  *
  * Este arquivo é importado pelo next.config.ts (para gerar os redirects /ir/*),
  * então ele NÃO pode importar nada com alias "@/" nem código React.
  */
+
+// Fotos reais por produto (slug), de fontes com licença livre.
+import { productPhotos } from "./productPhotos";
 
 export type CategorySlug = "jogos" | "nostalgia" | "roupas" | "relogios" | "computadores";
 
@@ -46,9 +49,11 @@ export interface Store {
 }
 
 export interface Photo {
-  /** ID da foto no Unsplash (parte depois de images.unsplash.com/). */
+  /** URL do Wikimedia Commons, caminho de um arquivo em public/ (ex.: "/produtos/gta-vi-ps5.jpg") ou ID do Unsplash. */
   id: string;
   alt: string;
+  /** Obrigatório para fotos Creative Commons: autor, licença e página do arquivo. */
+  credit?: { author: string; license: string; url: string };
 }
 
 export interface Product {
@@ -59,11 +64,13 @@ export interface Product {
   /** Preço em centavos. Deixe vazio em lojas com manualPrices: false. */
   price?: number;
   oldPrice?: number;
-  /** Foto principal (a primeira da galeria). */
-  image: string;
-  imageAlt: string;
-  /** Todas as fotos da página do produto, a principal primeiro. */
+  /** Foto principal (a primeira da galeria). Vazio quando ainda não há foto oficial do modelo. */
+  image?: string;
+  imageAlt?: string;
+  /** Fotos do próprio modelo (veja productPhotos.ts), a principal primeiro. Pode ser vazia. */
   gallery: Photo[];
+  /** Tipo do produto (ex.: "PS5", "Teclado"), mostrado no cartão sem foto. */
+  label: string;
   rating?: number;
   reviews?: number;
   tags: TagSlug[];
@@ -107,220 +114,23 @@ export const tags: Record<TagSlug, string> = {
 };
 
 /*
- * Fotos ilustrativas do Unsplash, agrupadas por tipo de produto.
- * A Amazon só permite usar as fotos dela pela API oficial (PA-API), então,
- * até lá, a página do produto mostra estas e avisa que são ilustrativas.
- * Produtos do mesmo tipo começam em fotos diferentes para a grade não repetir.
+ * Tipo de cada produto. Aparece no cartão do produto enquanto não há foto oficial:
+ * a loja só mostra foto do próprio modelo, nunca imagem genérica.
  */
-const photoSets = {
-  ps5: [
-    ["photo-1622297845775-5ff3fef71d13", "Console PlayStation 5 branco com controle"],
-    ["photo-1607853202273-797f1c22a38e", "Console de videogame e controle sobre a mesa"],
-    ["photo-1731405858377-6de0070d8d65", "Console de videogame branco sobre uma mesa"],
-  ],
-  "ps-controller": [
-    ["photo-1768166210760-9c9a4299c436", "Controle de videogame branco sobre fundo liso"],
-    ["photo-1774105416183-5058512ec5f0", "Controle branco sobre fundo laranja"],
-    ["photo-1664092815283-19c6196f5319", "Controle de videogame em destaque"],
-  ],
-  ps4: [
-    ["photo-1507457379470-08b800bebc67", "Console PlayStation 4 com controle"],
-    ["photo-1592840496694-26d035b52b48", "Controle preto de PlayStation 4"],
-    ["photo-1518908336710-4e1cf821d3d1", "Console PlayStation 4 sobre a estante"],
-  ],
-  xbox: [
-    ["photo-1621259182978-fbf93132d53d", "Console Xbox preto com controle"],
-    ["photo-1604586376807-f73185cf5867", "Controle de Xbox branco"],
-    ["photo-1612287230202-1ff1d85d1bdf", "Controle sem fio iluminado por luz colorida"],
-  ],
-  "xbox-controller": [
-    ["photo-1606144042614-b2417e99c4e3", "Controle de Xbox preto e branco"],
-    ["photo-1600861194942-f883de0dfe96", "Pessoa segurando um controle preto"],
-    ["photo-1612287230202-1ff1d85d1bdf", "Controle sem fio iluminado por luz colorida"],
-  ],
-  switch: [
-    ["photo-1612036781124-847f8939b154", "Nintendo Switch com controles vermelho e azul"],
-    ["photo-1578303512597-81e6cc155b3e", "Nintendo Switch ligado com os Joy-Con"],
-    ["photo-1585427795543-33cf23ea2853", "Pessoa jogando no Nintendo Switch"],
-  ],
-  switch2: [
-    ["photo-1749138149339-b744bb979317", "Nintendo Switch 2 com a tela acesa"],
-    ["photo-1578303512597-81e6cc155b3e", "Console da Nintendo com os Joy-Con"],
-    ["photo-1585427795543-33cf23ea2853", "Pessoa jogando num console portátil"],
-  ],
-  game: [
-    ["photo-1593305841991-05c297ba4575", "Tela mostrando um videogame"],
-    ["photo-1534423861386-85a16f5d13fd", "Pessoa jogando um jogo de tiro no computador"],
-    ["photo-1542751371-adc38448a05e", "Pessoa jogando videogame numa cadeira gamer"],
-  ],
-  gta: [
-    ["photo-1533106497176-45ae19e68ba2", "Fachada de hotel com letreiro de neon numa rua à noite"],
-    ["photo-1589066724013-06f34f2cc17c", "Carros numa avenida iluminada entre prédios à noite"],
-    ["photo-1535392432937-a27c36ec07b5", "Coqueiros contra o céu do pôr do sol"],
-  ],
-  headset: [
-    ["photo-1610041321327-b794c052db27", "Headset preto e vermelho apoiado numa mesa"],
-    ["photo-1560419015-7c427e8ae5ba", "Pessoa usando headset laranja e preto"],
-    ["photo-1610041321420-a596dd14ebc9", "Homem de capuz usando headset preto"],
-  ],
-  chair: [
-    ["photo-1770194993269-2521ad916c23", "Cadeira gamer vermelha e preta com luzes ao fundo"],
-    ["photo-1770195483917-b3bb444b7a29", "Cadeira gamer com luzes azuis ao fundo"],
-    ["photo-1670946839270-cc4febd43b09", "Cadeira de escritório preta e branca"],
-  ],
-  wheel: [
-    ["photo-1760553121003-93afc4d88ae0", "Homem jogando simulador de corrida com volante"],
-    ["photo-1771920800290-53f22e5ac3f8", "Mãos com luvas segurando um volante de simulador"],
-    ["photo-1771440571270-e27b63085a48", "Simulador de corrida com várias telas"],
-  ],
-  handheld: [
-    ["photo-1776490878540-3788d5f87391", "Console portátil branco de estilo clássico"],
-    ["photo-1597840900616-664e930c29df", "Console portátil retrô preto"],
-    ["photo-1581198321428-cd65cfc898e5", "Pessoa segurando um console portátil cinza"],
-  ],
-  arcade: [
-    ["photo-1757444838044-d9dcb1bb3017", "Máquina de fliperama antiga com luzes acesas"],
-    ["photo-1572289758057-3e0f4327833b", "Gabinete de fliperama retrô"],
-    ["photo-1511512578047-dfb367046420", "Sala de jogos com máquinas de fliperama"],
-  ],
-  vinyl: [
-    ["photo-1616714109948-c74fe5029a4d", "Disco de vinil âmbar girando no toca-discos"],
-    ["photo-1526394931762-90052e97b376", "Toca-discos preto sobre mesa de madeira"],
-    ["photo-1603850121303-d4ade9e5ba65", "Toca-discos de vinil preto e marrom"],
-  ],
-  cassette: [
-    ["photo-1494232410401-ad00d5433cfa", "Fita cassete sobre uma superfície"],
-    ["photo-1585435669168-f4cc3f5d1b8e", "Fita cassete cinza sobre fundo amarelo"],
-    ["photo-1784751657147-d5a24d71e4c0", "Fita cassete preta sobre fundo de madeira"],
-  ],
-  pc: [
-    ["photo-1616588589676-62b3bd4ff6d2", "Mesa de jogos com computador iluminado e monitor"],
-    ["photo-1779452525206-b3bb841dd4e6", "PC gamer branco com iluminação interna"],
-    ["photo-1597872200969-2b65d56bd16b", "Gabinete de computador preto com luz azul"],
-  ],
-  laptop: [
-    ["photo-1603302576837-37561b2e2302", "Notebook com tela colorida e teclado iluminado"],
-    ["photo-1640955014216-75201056c829", "Pessoa jogando videogame num notebook"],
-    ["photo-1782917439464-7d7be18e8912", "Notebook preto com a tela acesa"],
-  ],
-  keyboard: [
-    ["photo-1618384887929-16ec33fab9ef", "Teclado mecânico preto com teclas laranja"],
-    ["photo-1635987391914-cb84b567e68f", "Teclado preto e branco com teclas vermelhas"],
-    ["photo-1777259113729-9bda92fb8ce8", "Close de um teclado mecânico"],
-  ],
-  mouse: [
-    ["photo-1605773527852-c546a8584ea3", "Mouse com fio preto e vermelho"],
-    ["photo-1771444700533-ff7aa34d29fe", "Mouse gamer preto com detalhes azuis"],
-    ["photo-1629429408209-1f912961dbd8", "Mouse com fio preto e azul"],
-  ],
-  monitor: [
-    ["photo-1614624532983-4ce03382d63d", "Monitor de tela plana sobre a mesa com teclado"],
-    ["photo-1626218174358-7769486c4b79", "Monitor de computador ligado sobre a mesa"],
-    ["photo-1775410631936-7de96322df0b", "Setup gamer com vários monitores"],
-  ],
-  gpu: [
-    ["photo-1778621962156-f9b3d255fb5f", "Placa de vídeo preta com três ventoinhas"],
-    ["photo-1762838362452-fea83ce9c34c", "Placa de vídeo de três ventoinhas"],
-    ["photo-1660855551740-4474188debdb", "Computador por dentro com luz azul"],
-  ],
-  ssd: [
-    ["photo-1591799264318-7e6ef8ddb7ea", "Unidade de armazenamento de computador"],
-    ["photo-1518770660439-4636190af475", "Placa de circuito preta em close"],
-    ["photo-1562408590-e32931084e23", "Placa de circuito azul"],
-  ],
-  hd: [
-    ["photo-1601737487795-dab272f52420", "Disco rígido prateado e preto"],
-    ["photo-1581725645226-92ad3b4c16d8", "Disco rígido preto e prateado"],
-    ["photo-1589995186011-a7b485edc4bf", "Disco rígido branco e prateado"],
-  ],
-  motherboard: [
-    ["photo-1782330136040-533166d0c792", "Placa-mãe de computador com processador"],
-    ["photo-1712701815718-29f5fe510c0e", "Close de uma placa-mãe de computador"],
-    ["photo-1515630278258-407f66498911", "Placa-mãe verde e preta em close"],
-  ],
-  psu: [
-    ["photo-1762508346277-7938c42e2eef", "Gabinete aberto com os componentes à mostra"],
-    ["photo-1716062890647-60feae0609d0", "Caixa preta de computador sobre a mesa"],
-    ["photo-1675893857450-783969c8922f", "Gabinete de computador preto"],
-  ],
-  cooler: [
-    ["photo-1765824142326-8e9046b1f935", "Cooler branco com três ventoinhas"],
-    ["photo-1705614232873-190b1770c6be", "Par de coolers sobre a mesa"],
-    ["photo-1759836096416-de8379281362", "Componentes de computador com ventoinha"],
-  ],
-  ram: [
-    ["photo-1541029071515-84cc54f84dc5", "Pente de memória RAM em close"],
-    ["photo-1542978709-19c95dc3bc7e", "Pente de memória RAM"],
-    ["photo-1562976540-1502c2145186", "Placa de circuito verde em close"],
-  ],
-  cpu: [
-    ["photo-1555616635-640b71bdb185", "Pessoa segurando um processador"],
-    ["photo-1540829917886-91ab031b1764", "Processador de computador em close"],
-    ["photo-1682068548081-50aa8b92c8c1", "Processador sobre a mesa"],
-  ],
-  jacket: [
-    ["photo-1700993443419-b6f067e734e4", "Homem vestindo jaqueta de couro marrom"],
-    ["photo-1602525582399-7ef5f604ff7e", "Homem de jaqueta de couro preta"],
-    ["photo-1564628175829-afb5078c0779", "Camisa branca e jaqueta preta"],
-  ],
-  shirt: [
-    ["photo-1782227286076-4f5153a8cdac", "Camisas de flanela xadrez penduradas num cabide"],
-    ["photo-1617662408044-cda3ab7134c9", "Homem de camisa xadrez vermelha e branca"],
-    ["photo-1630355734650-55fe91e1e5c7", "Camisa xadrez vermelha e preta"],
-  ],
-  sneakers: [
-    ["photo-1542291026-7eec264c27ff", "Tênis vermelho sobre fundo vermelho"],
-    ["photo-1571008887538-b36bb32f4571", "Par de tênis azul e branco"],
-    ["photo-1709258228137-19a8c193be39", "Par de tênis sobre a mesa"],
-  ],
-  sport: [
-    ["photo-1780398683040-fce0ccbd5ef2", "Homem de roupa esportiva preta sorrindo"],
-    ["photo-1785355146243-6a944d173298", "Homem de camiseta esportiva preta"],
-    ["photo-1667890786608-8b2f8c60afa6", "Homem de camiseta branca"],
-  ],
-  sunglasses: [
-    ["photo-1589642380614-4a8c2147b857", "Óculos de sol aviador com armação prateada"],
-    ["photo-1567473810954-507d59716c25", "Óculos de sol aviador com armação dourada"],
-    ["photo-1759227922040-0ca4d3cbe42e", "Óculos de sol aviador sobre fundo amarelo"],
-  ],
-  wallet: [
-    ["photo-1775379557015-938546264440", "Carteiras de couro em vários tons lado a lado"],
-    ["photo-1579014134953-1580d7f123f3", "Carteira de couro preta"],
-    ["photo-1614260938313-a7fc1a7ad0d2", "Mãos segurando uma carteira e um celular"],
-  ],
-  chrono: [
-    ["photo-1542816340-4d3de5047cfd", "Relógio cronógrafo preto"],
-    ["photo-1524805444758-089113d48a6d", "Relógio cronógrafo prateado com pulseira de couro"],
-    ["photo-1539874754764-5a96559165b0", "Relógio cronógrafo preto e branco"],
-  ],
-  dive: [
-    ["photo-1691865179028-1729b766a5cd", "Relógio de mergulho apoiado sobre a mesa"],
-    ["photo-1612817159949-195b6eb9e31a", "Relógio analógico preto e prateado"],
-    ["photo-1773755060442-6d128b70dd20", "Close de um relógio de pulso cronógrafo"],
-  ],
-  classic: [
-    ["photo-1610897534349-7759782118b9", "Relógio analógico preto com detalhes dourados"],
-    ["photo-1614703418052-d5b893d495bc", "Relógio redondo dourado e preto"],
-    ["photo-1592865239912-7153891acf4a", "Relógio analógico dourado e branco"],
-  ],
-  digital: [
-    ["photo-1579116971616-ea6ab3fff959", "Relógio digital preto e prateado"],
-    ["photo-1605583972719-30bd2ca0705a", "Relógio digital preto"],
-    ["photo-1684823026928-a4c4e160bec2", "Relógio sobre uma mesa vermelha"],
-  ],
-  wood: [
-    ["photo-1564594995086-b32b7c7f4cd6", "Relógio de madeira sobre uma pedra"],
-    ["photo-1594576722512-582bcd46fba3", "Relógio analógico marrom e branco"],
-    ["photo-1600003014755-ba31aa59c4b6", "Relógio analógico prata e dourado"],
-  ],
-  cd: [
-    ["photo-1618034100983-e1d78be0dc80", "CD verde, azul e preto"],
-    ["photo-1528721602843-51bfb35c8ba8", "Pessoa segurando um CD"],
-    ["photo-1533106497176-45ae19e68ba2", "Fachada com letreiro de neon à noite"],
-  ],
-} satisfies Record<string, [string, string][]>;
+const kindLabels = {
+  ps5: "PS5", ps5slim: "PS5 Slim", "ps-controller": "PS5", ps4: "PS4",
+  xbox: "Xbox", "xbox-controller": "Xbox", pad: "Xbox e PC",
+  switch: "Switch", switch2: "Switch 2", game: "Jogo", gta: "Rockstar Games",
+  headset: "Headset", chair: "Cadeira", wheel: "Volante",
+  handheld: "Portátil retrô", arcade: "Fliperama", vinyl: "Vitrola", cassette: "Fita K7",
+  pc: "PC gamer", laptop: "Notebook", keyboard: "Teclado", mouse: "Mouse", monitor: "Monitor",
+  gpu: "Placa de vídeo", ssd: "SSD", hd: "HD externo", motherboard: "Placa-mãe", psu: "Fonte",
+  cooler: "Cooler", ram: "Memória RAM", cpu: "Processador",
+  jacket: "Jaqueta", shirt: "Camisa", sneakers: "Tênis", sport: "Esporte", sunglasses: "Óculos", wallet: "Carteira",
+  chrono: "Relógio", dive: "Relógio", classic: "Relógio", digital: "Relógio", wood: "Relógio", cd: "Álbum",
+} satisfies Record<string, string>;
 
-type Kind = keyof typeof photoSets;
+type Kind = keyof typeof kindLabels;
 
 interface Draft {
   slug: string;
@@ -334,6 +144,8 @@ interface Draft {
   /** Link de afiliado (link.amazon do SiteStripe, ou outro link https da loja). */
   link: string;
   store?: StoreSlug;
+  /** Fotos do produto em si (também podem ficar em productPhotos.ts). */
+  photos?: Photo[];
 }
 
 /** Busca na Amazon já com a sua tag, para itens sem link próprio. */
@@ -359,7 +171,7 @@ const drafts: Draft[] = [
     link: amz("grand theft auto vi xbox series"),
   },
   {
-    slug: "bundle-gta-vi-ps5-slim", title: "PS5 Slim Digital 825 GB com GTA VI, Astro Bot e Gran Turismo 7", category: "jogos", kind: "ps5",
+    slug: "bundle-gta-vi-ps5-slim", title: "PS5 Slim Digital 825 GB com GTA VI, Astro Bot e Gran Turismo 7", category: "jogos", kind: "ps5slim",
     tags: ["gta6", "playstation", "lancamento"],
     summary: "O console e o jogo do ano na mesma caixa.",
     description: "Pacote com o PlayStation 5 Slim Edição Digital de 825 GB, GTA VI e os jogos Astro Bot e Gran Turismo 7. Edição digital: não tem leitor de disco, os jogos vêm em código para baixar.",
@@ -425,7 +237,7 @@ const drafts: Draft[] = [
     link: "https://link.amazon/B00AZlGE5",
   },
   {
-    slug: "console-ps5-slim-digital-bundle", title: "PS5 Slim Digital 825 GB com Astro Bot e Gran Turismo 7", category: "jogos", kind: "ps5",
+    slug: "console-ps5-slim-digital-bundle", title: "PS5 Slim Digital 825 GB com Astro Bot e Gran Turismo 7", category: "jogos", kind: "ps5slim",
     tags: ["playstation", "familia"],
     summary: "Console mais compacto com dois jogos para começar.",
     description: "PlayStation 5 Slim Edição Digital de 825 GB com os jogos Astro Bot e Gran Turismo 7. Astro Bot agrada as crianças; Gran Turismo, quem gosta de carro.",
@@ -433,7 +245,7 @@ const drafts: Draft[] = [
     link: "https://link.amazon/B020eFl8p",
   },
   {
-    slug: "bundle-wolverine-ps5-slim", title: "PS5 Slim com disco + Marvel's Wolverine, Astro Bot e Gran Turismo 7", category: "jogos", kind: "ps5",
+    slug: "bundle-wolverine-ps5-slim", title: "PS5 Slim com disco + Marvel's Wolverine, Astro Bot e Gran Turismo 7", category: "jogos", kind: "ps5slim",
     tags: ["playstation", "lancamento"],
     summary: "PS5 com leitor de disco e três jogos.",
     description: "Pacote com o PlayStation 5 Slim com leitor de disco, Marvel's Wolverine, Astro Bot e Gran Turismo 7. Com leitor, dá para comprar jogos físicos e usados.",
@@ -441,7 +253,7 @@ const drafts: Draft[] = [
     link: "https://link.amazon/B09qZrW4b",
   },
   {
-    slug: "console-ps5-slim-disc-2-controles", title: "PS5 Slim com disco e 2 controles DualSense (importado)", category: "jogos", kind: "ps5",
+    slug: "console-ps5-slim-disc-2-controles", title: "PS5 Slim com disco e 2 controles DualSense (importado)", category: "jogos", kind: "ps5slim",
     tags: ["playstation", "familia"],
     summary: "Já vem com o segundo controle para jogar a dois.",
     description: "PlayStation 5 Slim com leitor de disco e dois controles DualSense, um branco e um preto. É a versão importada da Arábia Saudita (KSA): confira na loja a tomada e a garantia antes de comprar.",
@@ -473,7 +285,7 @@ const drafts: Draft[] = [
     link: "https://link.amazon/B0dpNha09",
   },
   {
-    slug: "drive-disco-ps5", title: "Drive de disco para PS5 Slim e PS5 Pro", category: "jogos", kind: "ps5",
+    slug: "drive-disco-ps5", title: "Drive de disco para PS5 Slim e PS5 Pro", category: "jogos", kind: "ps5slim",
     tags: ["playstation"],
     summary: "Transforma o PS5 digital em versão com disco.",
     description: "Leitor de disco oficial que encaixa no PS5 Slim Digital e no PS5 Pro. Com ele você passa a jogar mídia física e assistir Blu-ray.",
@@ -629,7 +441,7 @@ const drafts: Draft[] = [
     link: "https://link.amazon/B0dehe722",
   },
   {
-    slug: "controle-gamesir-g7-pro", title: "Controle GameSir G7 Pro sem fio para Xbox e PC", category: "jogos", kind: "xbox-controller",
+    slug: "controle-gamesir-g7-pro", title: "Controle GameSir G7 Pro sem fio para Xbox e PC", category: "jogos", kind: "pad",
     tags: ["xbox", "setup"],
     summary: "Controle profissional com analógicos que não sofrem drift.",
     description: "Controle tri-mode (2.4G, Bluetooth e cabo) para Xbox, PC e Android. Tem joysticks Hall Effect e TMR contra drift, polling de 1000 Hz, botões de macro, giroscópio e vibração com quatro motores.",
@@ -637,7 +449,7 @@ const drafts: Draft[] = [
     link: "https://link.amazon/A0dNJ0m8C",
   },
   {
-    slug: "controle-gamesir-g7-se", title: "Controle GameSir G7 SE com fio para Xbox e PC", category: "jogos", kind: "xbox-controller",
+    slug: "controle-gamesir-g7-se", title: "Controle GameSir G7 SE com fio para Xbox e PC", category: "jogos", kind: "pad",
     tags: ["xbox", "setup"],
     summary: "Controle com fio e joysticks Hall por um preço menor.",
     description: "Controle com fio para Xbox One, Xbox Series X|S e PC, plug and play. Joysticks e gatilhos Hall Effect e entrada de fone de 3,5 mm.",
@@ -1446,17 +1258,19 @@ const drafts: Draft[] = [
   },
 ];
 
-// Monta os produtos: fotos por tipo (girando para não repetir) e o link final.
-const used = new Map<Kind, number>();
-export const products: Product[] = drafts.map(({ kind, link, store = "amazon", ...d }) => {
-  const set = photoSets[kind];
-  const n = used.get(kind) ?? 0;
-  used.set(kind, n + 1);
-  const gallery = set.map((_, i) => {
-    const [id, alt] = set[(i + n) % set.length];
-    return { id, alt };
-  });
-  return { ...d, store, gallery, image: gallery[0].id, imageAlt: gallery[0].alt, affiliateUrl: link };
+// Monta os produtos: fotos do próprio modelo (se houver) e o link final.
+export const products: Product[] = drafts.map(({ kind, link, store = "amazon", photos, slug, ...d }) => {
+  const gallery = photos ?? productPhotos[slug] ?? [];
+  return {
+    ...d,
+    slug,
+    store,
+    gallery,
+    label: kindLabels[kind],
+    image: gallery[0]?.id,
+    imageAlt: gallery[0]?.alt,
+    affiliateUrl: link,
+  };
 });
 
 // ── Validação no build ───────────────────────────────────
@@ -1485,5 +1299,11 @@ for (const p of products) {
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
 export const getCategory = (slug: string) => categories.find((c) => c.slug === slug);
 export const getStore = (slug: StoreSlug) => stores.find((s) => s.slug === slug)!;
+/** Fotos de produto aparecem inteiras, sem recorte, sobre fundo branco. */
+export const photoFit = (id: string) => (isProductPhoto(id) ? "object-contain bg-white p-[6%]" : "object-cover");
+/** Foto de produto = URL do Wikimedia ou arquivo próprio em public/produtos/. */
+const isProductPhoto = (id: string) => id.startsWith("https://") || id.startsWith("/");
+
+/** URL da foto: IDs do Unsplash ganham o tamanho pedido; URLs completas passam direto. */
 export const unsplash = (id: string, w = 900) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
+  isProductPhoto(id) ? id : `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;

@@ -1,11 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { unsplash } from "@/data/catalog";
 import { formatPrice } from "@/lib/format";
 import { searchProducts } from "@/lib/search";
+import { ProductArt } from "./ProductArt";
 
 /**
  * Busca do topo: mostra sugestões enquanto você digita (sem ir ao servidor,
@@ -120,7 +119,9 @@ export function SearchBox() {
                   i === active ? "bg-gold" : ""
                 }`}
               >
-                <Image src={unsplash(p.image, 120)} alt="" width={44} height={44} className="photo size-11 object-cover border-2 border-ink" />
+                <span className="relative size-11 shrink-0 overflow-hidden border-2 border-ink">
+                  <ProductArt product={p} width={120} sizes="44px" compact />
+                </span>
                 <span className="flex-1 min-w-0 truncate">{p.title}</span>
                 <span className="font-pixel shrink-0">{p.price ? formatPrice(p.price) : "Ver preço"}</span>
               </li>
