@@ -6,7 +6,7 @@ import { products } from "@/data/catalog";
 
 export const metadata: Metadata = {
   title: "Todos os produtos",
-  description: "Busque e filtre jogos, itens nostálgicos, roupas, relógios e computadores por preço, loja e ocasião.",
+  description: "Busque e filtre jogos, itens nostálgicos, roupas, relógios e computadores por categoria e coleção.",
   alternates: { canonical: "/produtos" },
 };
 

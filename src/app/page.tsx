@@ -1,11 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { categories, products, unsplash } from "@/data/catalog";
+import { categories, getProduct, products, unsplash, type Product } from "@/data/catalog";
 import { DialogBox } from "@/components/DialogBox";
 import { Mascot } from "@/components/Mascot";
 import { PixelIcon, type IconName } from "@/components/PixelIcon";
 import { ProductGrid } from "@/components/ProductCard";
-import { discount } from "@/lib/search";
 
 const values: { icon: IconName; name: string; text: string }[] = [
   { icon: "crown", name: "Legado", text: "O que você compra hoje pode estar no pulso do seu filho daqui a 30 anos." },
@@ -16,7 +15,19 @@ const values: { icon: IconName; name: string; text: string }[] = [
 
 export default function Home() {
   const gta = products.filter((p) => p.tags.includes("gta6"));
-  const deals = [...products].filter((p) => p.oldPrice).sort((a, b) => discount(b) - discount(a)).slice(0, 8);
+  // Vitrine da home: um destaque de cada canto da loja.
+  const featured = [
+    "console-ps5-digital",
+    "bundle-switch-2-mario-kart-world",
+    "pc-gamer-ryzen-7-rtx-5060-32gb",
+    "monitor-aoc-agon-q27g4f",
+    "cabine-street-fighter-ii",
+    "vitrola-raveo-sonetto",
+    "relogio-casio-a158wa",
+    "oculos-ray-ban-aviator",
+  ]
+    .map(getProduct)
+    .filter(Boolean) as Product[];
   const family = products.filter((p) => p.tags.includes("familia")).slice(0, 4);
 
   return (
@@ -107,15 +118,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Ofertas ── */}
-      <section aria-labelledby="deals-title" className="mx-auto max-w-7xl px-4 mt-20">
+      {/* ── Destaques ── */}
+      <section aria-labelledby="featured-title" className="mx-auto max-w-7xl px-4 mt-20">
         <div className="flex items-end justify-between gap-4 mb-5">
-          <h2 id="deals-title" className="font-pixel text-3xl">Maiores descontos agora</h2>
-          <Link href="/produtos?ordem=desconto" className="text-blue font-bold underline underline-offset-4 shrink-0">
-            Ver todos
+          <h2 id="featured-title" className="font-pixel text-3xl">Escolhas do Léo</h2>
+          <Link href="/produtos" className="text-blue font-bold underline underline-offset-4 shrink-0">
+            Ver todos os {products.length}
           </Link>
         </div>
-        <ProductGrid items={deals} />
+        <ProductGrid items={featured} />
       </section>
 
       {/* ── Família ── */}

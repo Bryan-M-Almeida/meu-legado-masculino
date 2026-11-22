@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ProductGallery } from "@/components/ProductGallery";
 import { ProductGrid } from "@/components/ProductCard";
 import { ProductSkeleton } from "@/components/Skeleton";
 import { getCategory, getProduct, getStore, products, tags, unsplash } from "@/data/catalog";
@@ -40,7 +40,11 @@ async function ProdutoContent({ params }: { params: PageProps<"/produto/[slug]">
   const cat = getCategory(p.category)!;
   const store = getStore(p.store);
   const off = discount(p);
-  const related = products.filter((x) => x.slug !== p.slug && (x.category === p.category || x.tags.some((t) => p.tags.includes(t)))).slice(0, 4);
+  const shared = (x: typeof p) => x.tags.filter((t) => p.tags.includes(t)).length + (x.category === p.category ? 1 : 0);
+  const related = products
+    .filter((x) => x.slug !== p.slug && shared(x) > 0)
+    .sort((a, b) => shared(b) - shared(a))
+    .slice(0, 4);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
@@ -50,11 +54,7 @@ async function ProdutoContent({ params }: { params: PageProps<"/produto/[slug]">
       </nav>
 
       <div className="grid gap-10 md:grid-cols-2 items-start">
-        <div className="px-frame overflow-hidden">
-          <div className="relative aspect-square">
-            <Image src={unsplash(p.image, 1200)} alt={p.imageAlt} fill priority sizes="(min-width: 768px) 50vw, 100vw" className="photo object-cover" />
-          </div>
-        </div>
+        <ProductGallery photos={p.gallery} title={p.title} />
 
         <div>
           <div className="flex flex-wrap gap-2">
@@ -108,6 +108,9 @@ async function ProdutoContent({ params }: { params: PageProps<"/produto/[slug]">
               sem custo extra para você.
             </p>
           </div>
+
+          <h2 className="font-pixel text-xl mt-8">Sobre o produto</h2>
+          <p className="mt-3 text-charcoal leading-relaxed">{p.description}</p>
 
           <h2 className="font-pixel text-xl mt-8">O que vale saber</h2>
           <ul className="mt-3 space-y-2">

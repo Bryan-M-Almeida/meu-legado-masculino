@@ -16,6 +16,7 @@ const index = new Map<string, string>(
         ...p.tags.map((t) => tags[t]),
         p.summary,
         p.highlights.join(" "),
+        p.description,
       ].join(" "),
     ),
   ]),

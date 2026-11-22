@@ -15,9 +15,9 @@ const pick = (...slugs: string[]) => slugs.map(getProduct).filter(Boolean) as Pr
 
 // O setup é montado em ordem: primeiro o jogo, depois onde rodar, depois o conforto.
 const steps = [
-  { title: "Garanta o jogo", text: "Para PS5 ou Xbox Series X|S.", items: pick("gta-vi-ps5", "gta-vi-xbox") },
-  { title: "Escolha onde jogar", text: "Ainda sem console da geração atual? Comece por aqui.", items: pick("console-ps5-digital", "console-xbox-series-s", "controle-dualsense") },
-  { title: "Deixe a maratona confortável", text: "Leonida é grande. Suas costas e seus ouvidos agradecem.", items: pick("headset-gamer", "cadeira-gamer", "oculos-aviador") },
+  { title: "Garanta o jogo", text: "Para PS5 ou Xbox Series X|S.", items: pick("gta-vi-ps5", "gta-vi-xbox", "bundle-gta-vi-ps5-slim") },
+  { title: "Escolha onde jogar", text: "Ainda sem console da geração atual? Comece por aqui.", items: pick("console-ps5-digital", "console-xbox-series-x-digital", "console-xbox-series-s", "controle-dualsense") },
+  { title: "Deixe a maratona confortável", text: "Leonida é grande. Suas costas e seus ouvidos agradecem.", items: pick("headset-redragon-zeus-lite", "cadeira-gamer-branca", "oculos-aviador-luke-sports") },
 ];
 
 export default function GtaPage() {

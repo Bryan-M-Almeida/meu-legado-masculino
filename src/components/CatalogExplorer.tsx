@@ -1,8 +1,8 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
-import { categories, products, stores, tags, type CategorySlug, type StoreSlug, type TagSlug } from "@/data/catalog";
+import { useState, useTransition } from "react";
+import { categories, products, stores, tags, type CategorySlug, type Product, type StoreSlug, type TagSlug } from "@/data/catalog";
 import { discount, score, sortLabels, type SortKey } from "@/lib/search";
 import { ProductGrid } from "./ProductCard";
 import { Mascot } from "./Mascot";
@@ -17,7 +17,21 @@ const priceRanges = [
 const isCat = (v: string): v is CategorySlug => categories.some((c) => c.slug === v);
 const isStore = (v: string): v is StoreSlug => stores.some((s) => s.slug === v);
 const isTag = (v: string): v is TagSlug => v in tags;
-const isSort = (v: string): v is SortKey => v in sortLabels;
+// Filtros e ordenações só aparecem quando os dados permitem. Na Amazon não há
+// preço nem nota digitados à mão, então sem eles esses controles somem.
+const hasPrices = products.some((p) => p.price !== undefined);
+const hasDiscounts = products.some((p) => p.oldPrice !== undefined);
+const hasRatings = products.some((p) => p.rating !== undefined);
+const usedStores = stores.filter((s) => products.some((p) => p.store === s.slug));
+const sortKeys = (Object.keys(sortLabels) as SortKey[]).filter(
+  (k) =>
+    k === "relevancia" ||
+    ((k === "menor-preco" || k === "maior-preco") && hasPrices) ||
+    (k === "desconto" && hasDiscounts) ||
+    (k === "avaliacao" && hasRatings),
+);
+const isSort = (v: string): v is SortKey => sortKeys.includes(v as SortKey);
+const PAGE = 24;
 
 /**
  * Catálogo com busca e filtros. Todo o estado mora na URL
@@ -43,12 +57,13 @@ export function CatalogExplorer({ lockedCategory }: { lockedCategory?: CategoryS
   const results = (() => {
     const list = products
       .map((p) => ({ p, s: score(p, q) }))
-      .filter(({ p, s }) =>
-        s > 0 &&
-        (!cats.length || cats.includes(p.category)) &&
-        (!lojas.length || lojas.includes(p.store)) &&
-        (!tagSel.length || tagSel.every((t) => p.tags.includes(t))) &&
-        (!preco || (p.price !== undefined && p.price >= preco.min && p.price < preco.max)),
+      .filter(
+        ({ p, s }) =>
+          s > 0 &&
+          (!cats.length || cats.includes(p.category)) &&
+          (!lojas.length || lojas.includes(p.store)) &&
+          (!tagSel.length || tagSel.every((t) => p.tags.includes(t))) &&
+          (!preco || (p.price !== undefined && p.price >= preco.min && p.price < preco.max)),
       );
     const by: Record<SortKey, (a: (typeof list)[0], b: (typeof list)[0]) => number> = {
       // Empate: mantém a ordem do catálogo (a ordem em que você listou os produtos).
@@ -88,43 +103,45 @@ export function CatalogExplorer({ lockedCategory }: { lockedCategory?: CategoryS
           ))}
         </fieldset>
       )}
+      {hasPrices && (
+        <fieldset>
+          <legend className="font-pixel text-lg mb-2">Preço</legend>
+          {priceRanges.map((r) => (
+            <label key={r.id} className="flex items-center gap-2.5 py-1 cursor-pointer">
+              <input
+                type="radio"
+                name="preco"
+                className="size-4 accent-blue"
+                checked={preco?.id === r.id}
+                onChange={() => update((sp) => sp.set("preco", r.id))}
+              />
+              {r.label}
+            </label>
+          ))}
+          {preco && (
+            <>
+              <button type="button" onClick={() => update((sp) => sp.delete("preco"))} className="mt-1 text-sm text-blue underline">
+                Qualquer preço
+              </button>
+              <p className="mt-2 text-sm text-slate">Produtos da Amazon mostram o preço só na loja e não entram neste filtro.</p>
+            </>
+          )}
+        </fieldset>
+      )}
       <fieldset>
-        <legend className="font-pixel text-lg mb-2">Preço</legend>
-        {priceRanges.map((r) => (
-          <label key={r.id} className="flex items-center gap-2.5 py-1 cursor-pointer">
-            <input
-              type="radio"
-              name="preco"
-              className="size-4 accent-blue"
-              checked={preco?.id === r.id}
-              onChange={() => update((sp) => sp.set("preco", r.id))}
-            />
-            {r.label}
-          </label>
-        ))}
-        {preco && (
-          <>
-            <button type="button" onClick={() => update((sp) => sp.delete("preco"))} className="mt-1 text-sm text-blue underline">
-              Qualquer preço
-            </button>
-            <p className="mt-2 text-sm text-slate">Produtos da Amazon mostram o preço só na loja e não entram neste filtro.</p>
-          </>
-        )}
-      </fieldset>
-      <fieldset>
-        <legend className="font-pixel text-lg mb-2">Ocasião</legend>
+        <legend className="font-pixel text-lg mb-2">Coleção</legend>
         {(Object.keys(tags) as TagSlug[]).map((t) => (
           <Check key={t} label={tags[t]} checked={tagSel.includes(t)} onChange={() => toggle("tag", t)} />
         ))}
       </fieldset>
-      <fieldset>
-        <legend className="font-pixel text-lg mb-2">Loja</legend>
-        {stores
-          .filter((s) => products.some((p) => p.store === s.slug))
-          .map((s) => (
+      {usedStores.length > 1 && (
+        <fieldset>
+          <legend className="font-pixel text-lg mb-2">Loja</legend>
+          {usedStores.map((s) => (
             <Check key={s.slug} label={s.name} checked={lojas.includes(s.slug)} onChange={() => toggle("loja", s.slug)} />
           ))}
-      </fieldset>
+        </fieldset>
+      )}
     </div>
   );
 
@@ -147,7 +164,8 @@ export function CatalogExplorer({ lockedCategory }: { lockedCategory?: CategoryS
             {results.length === 1 ? "1 produto" : `${results.length} produtos`}
             {q && (
               <>
-                {" "}para <strong className="text-ink">“{q}”</strong>
+                {" "}
+                para <strong className="text-ink">“{q}”</strong>
               </>
             )}
           </p>
@@ -157,26 +175,29 @@ export function CatalogExplorer({ lockedCategory }: { lockedCategory?: CategoryS
                 Limpar filtros
               </button>
             )}
-            <label className="flex items-center gap-2 text-sm">
-              <span className="text-slate">Ordenar por</span>
-              <select
-                value={ordem}
-                onChange={(e) => update((sp) => (e.target.value === "relevancia" ? sp.delete("ordem") : sp.set("ordem", e.target.value)))}
-                className="border-[3px] border-ink bg-surface px-2 py-1.5 font-bold"
-              >
-                {(Object.keys(sortLabels) as SortKey[]).map((k) => (
-                  <option key={k} value={k}>
-                    {sortLabels[k]}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {sortKeys.length > 1 && (
+              <label className="flex items-center gap-2 text-sm">
+                <span className="text-slate">Ordenar por</span>
+                <select
+                  value={ordem}
+                  onChange={(e) => update((sp) => (e.target.value === "relevancia" ? sp.delete("ordem") : sp.set("ordem", e.target.value)))}
+                  className="border-[3px] border-ink bg-surface px-2 py-1.5 font-bold"
+                >
+                  {sortKeys.map((k) => (
+                    <option key={k} value={k}>
+                      {sortLabels[k]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
           </div>
         </div>
 
         {results.length ? (
           <div className={pending ? "opacity-60" : ""}>
-            <ProductGrid items={results} priorityCount={4} />
+            {/* key: volta para a primeira página quando os filtros mudam */}
+            <Paged key={params.toString()} items={results} />
           </div>
         ) : (
           <div className="px-frame p-8 flex flex-col sm:flex-row items-center gap-6">
@@ -192,6 +213,27 @@ export function CatalogExplorer({ lockedCategory }: { lockedCategory?: CategoryS
         )}
       </section>
     </div>
+  );
+}
+
+/** Mostra 24 por vez, com botão para carregar mais. */
+function Paged({ items }: { items: Product[] }) {
+  const [limit, setLimit] = useState(PAGE);
+  const rest = items.length - limit;
+  return (
+    <>
+      <ProductGrid items={items.slice(0, limit)} priorityCount={4} />
+      {rest > 0 && (
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <button type="button" onClick={() => setLimit((l) => l + PAGE)} className="px-btn px-btn-gold">
+            Mostrar mais {Math.min(rest, PAGE)}
+          </button>
+          <p className="text-sm text-slate">
+            Mostrando {limit} de {items.length}
+          </p>
+        </div>
+      )}
+    </>
   );
 }
 
