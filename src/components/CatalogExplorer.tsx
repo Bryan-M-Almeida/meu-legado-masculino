@@ -48,14 +48,15 @@ export function CatalogExplorer({ lockedCategory }: { lockedCategory?: CategoryS
         (!cats.length || cats.includes(p.category)) &&
         (!lojas.length || lojas.includes(p.store)) &&
         (!tagSel.length || tagSel.every((t) => p.tags.includes(t))) &&
-        (!preco || (p.price >= preco.min && p.price < preco.max)),
+        (!preco || (p.price !== undefined && p.price >= preco.min && p.price < preco.max)),
       );
     const by: Record<SortKey, (a: (typeof list)[0], b: (typeof list)[0]) => number> = {
-      relevancia: (a, b) => b.s - a.s || b.p.rating - a.p.rating,
-      "menor-preco": (a, b) => a.p.price - b.p.price,
-      "maior-preco": (a, b) => b.p.price - a.p.price,
+      // Empate: mantém a ordem do catálogo (a ordem em que você listou os produtos).
+      relevancia: (a, b) => b.s - a.s,
+      "menor-preco": (a, b) => (a.p.price ?? Infinity) - (b.p.price ?? Infinity),
+      "maior-preco": (a, b) => (b.p.price ?? -1) - (a.p.price ?? -1),
       desconto: (a, b) => discount(b.p) - discount(a.p),
-      avaliacao: (a, b) => b.p.rating - a.p.rating,
+      avaliacao: (a, b) => (b.p.rating ?? 0) - (a.p.rating ?? 0),
     };
     return list.sort(by[ordem]).map((r) => r.p);
   })();
@@ -102,9 +103,12 @@ export function CatalogExplorer({ lockedCategory }: { lockedCategory?: CategoryS
           </label>
         ))}
         {preco && (
-          <button type="button" onClick={() => update((sp) => sp.delete("preco"))} className="mt-1 text-sm text-blue underline">
-            Qualquer preço
-          </button>
+          <>
+            <button type="button" onClick={() => update((sp) => sp.delete("preco"))} className="mt-1 text-sm text-blue underline">
+              Qualquer preço
+            </button>
+            <p className="mt-2 text-sm text-slate">Produtos da Amazon mostram o preço só na loja e não entram neste filtro.</p>
+          </>
         )}
       </fieldset>
       <fieldset>

@@ -31,13 +31,19 @@ export function ProductCard({ product: p, priority = false }: { product: Product
           </Link>
         </h3>
         <div className="mt-auto flex items-end justify-between gap-2 pt-1">
-          <div>
-            {p.oldPrice && <s className="block text-sm text-slate">{formatPrice(p.oldPrice)}</s>}
-            <span className="font-pixel text-xl leading-none">{formatPrice(p.price)}</span>
-          </div>
-          <span className="text-sm text-slate" aria-label={`Nota ${p.rating} de 5`}>
-            ★ {p.rating.toFixed(1)}
-          </span>
+          {p.price ? (
+            <div>
+              {p.oldPrice && <s className="block text-sm text-slate">{formatPrice(p.oldPrice)}</s>}
+              <span className="font-pixel text-xl leading-none">{formatPrice(p.price)}</span>
+            </div>
+          ) : (
+            <span className="font-pixel text-blue leading-tight">Ver preço na {getStore(p.store).name}</span>
+          )}
+          {p.rating && (
+            <span className="text-sm text-slate" aria-label={`Nota ${p.rating} de 5`}>
+              ★ {p.rating.toFixed(1)}
+            </span>
+          )}
         </div>
       </div>
       <span className="sr-only">{p.tags.map((t) => tags[t]).join(", ")}</span>

@@ -65,29 +65,42 @@ async function ProdutoContent({ params }: { params: PageProps<"/produto/[slug]">
             ))}
           </div>
           <h1 className="font-pixel text-3xl sm:text-4xl leading-tight mt-4">{p.title}</h1>
-          <p className="mt-2 text-slate">
-            ★ {p.rating.toFixed(1)} de 5, com {p.reviews.toLocaleString("pt-BR")} avaliações na {store.name}
-          </p>
+          {p.rating && p.reviews && (
+            <p className="mt-2 text-slate">
+              ★ {p.rating.toFixed(1)} de 5, com {p.reviews.toLocaleString("pt-BR")} avaliações na {store.name}
+            </p>
+          )}
           <p className="mt-5 text-lg text-charcoal">{p.summary}</p>
 
           <div className="mt-6 px-frame p-5">
-            <div className="flex items-end gap-3 flex-wrap">
-              <span className="font-pixel text-4xl leading-none">{formatPrice(p.price)}</span>
-              {p.oldPrice && (
-                <>
-                  <s className="text-slate">{formatPrice(p.oldPrice)}</s>
-                  <span className="tag bg-crimson text-white">-{off}%</span>
-                </>
-              )}
-            </div>
-            <p className="mt-2 text-sm text-slate">Preço visto na {store.name}. Pode mudar a qualquer momento.</p>
+            {p.price ? (
+              <>
+                <div className="flex items-end gap-3 flex-wrap">
+                  <span className="font-pixel text-4xl leading-none">{formatPrice(p.price)}</span>
+                  {p.oldPrice && (
+                    <>
+                      <s className="text-slate">{formatPrice(p.oldPrice)}</s>
+                      <span className="tag bg-crimson text-white">-{off}%</span>
+                    </>
+                  )}
+                </div>
+                <p className="mt-2 text-sm text-slate">Preço visto na {store.name}. Pode mudar a qualquer momento.</p>
+              </>
+            ) : (
+              <>
+                <p className="font-pixel text-2xl leading-tight">Preço atualizado na {store.name}</p>
+                <p className="mt-2 text-sm text-slate">
+                  O preço e as avaliações mudam com frequência. Confira os valores de hoje direto na {store.name}.
+                </p>
+              </>
+            )}
             <a
               href={`/ir/${p.slug}`}
               target="_blank"
               rel="sponsored nofollow noopener noreferrer"
               className="px-btn px-btn-gold w-full mt-5 text-lg"
             >
-              Ver oferta na {store.name}
+              {p.price ? `Ver oferta na ${store.name}` : `Ver preço na ${store.name}`}
               <span className="sr-only">(abre em nova aba)</span>
             </a>
             <p className="mt-3 text-sm text-slate">

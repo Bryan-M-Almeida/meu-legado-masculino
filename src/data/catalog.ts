@@ -27,6 +27,12 @@ export interface Store {
   name: string;
   /** Domínios para onde o /ir/* pode redirecionar. Qualquer outro quebra o build. */
   hosts: string[];
+  /**
+   * Se a loja permite exibir preço e nota digitados à mão.
+   * A Amazon só aceita preço vindo da API oficial (PA-API), então lá fica false
+   * e o site mostra "Ver preço na Amazon".
+   */
+  manualPrices: boolean;
 }
 
 export interface Product {
@@ -34,14 +40,14 @@ export interface Product {
   title: string;
   category: CategorySlug;
   store: StoreSlug;
-  /** Preço em centavos, para evitar erro de ponto flutuante. */
-  price: number;
+  /** Preço em centavos. Deixe vazio em lojas com manualPrices: false. */
+  price?: number;
   oldPrice?: number;
   /** ID da foto no Unsplash (parte depois de images.unsplash.com/). */
   image: string;
   imageAlt: string;
-  rating: number;
-  reviews: number;
+  rating?: number;
+  reviews?: number;
   tags: TagSlug[];
   summary: string;
   highlights: string[];
@@ -58,12 +64,13 @@ export const categories: Category[] = [
 ];
 
 export const stores: Store[] = [
-  { slug: "amazon", name: "Amazon", hosts: ["www.amazon.com.br", "amazon.com.br", "amzn.to"] },
-  { slug: "mercadolivre", name: "Mercado Livre", hosts: ["www.mercadolivre.com.br", "lista.mercadolivre.com.br", "produto.mercadolivre.com.br", "meli.la"] },
-  { slug: "magalu", name: "Magalu", hosts: ["www.magazinevoce.com.br", "www.magazineluiza.com.br", "divulgador.magalu.com"] },
-  { slug: "shopee", name: "Shopee", hosts: ["shopee.com.br", "s.shopee.com.br"] },
-  { slug: "kabum", name: "KaBuM!", hosts: ["www.kabum.com.br"] },
-  { slug: "hotmart", name: "Hotmart", hosts: ["go.hotmart.com", "pay.hotmart.com"] },
+  // link.amazon = links curtos oficiais do SiteStripe da Amazon.
+  { slug: "amazon", name: "Amazon", hosts: ["www.amazon.com.br", "amazon.com.br", "amzn.to", "link.amazon"], manualPrices: false },
+  { slug: "mercadolivre", name: "Mercado Livre", hosts: ["www.mercadolivre.com.br", "lista.mercadolivre.com.br", "produto.mercadolivre.com.br", "meli.la"], manualPrices: true },
+  { slug: "magalu", name: "Magalu", hosts: ["www.magazinevoce.com.br", "www.magazineluiza.com.br", "divulgador.magalu.com"], manualPrices: true },
+  { slug: "shopee", name: "Shopee", hosts: ["shopee.com.br", "s.shopee.com.br"], manualPrices: true },
+  { slug: "kabum", name: "KaBuM!", hosts: ["www.kabum.com.br"], manualPrices: true },
+  { slug: "hotmart", name: "Hotmart", hosts: ["go.hotmart.com", "pay.hotmart.com"], manualPrices: true },
 ];
 
 export const tags: Record<TagSlug, string> = {
@@ -76,11 +83,13 @@ export const tags: Record<TagSlug, string> = {
 };
 
 /*
- * Links de exemplo: buscas reais nas lojas com um parâmetro de afiliado fictício.
- * Troque pelos seus links de afiliado antes de publicar.
+ * Produtos com link de afiliado real usam o link curto do SiteStripe (link.amazon).
+ * Os demais ainda são buscas na loja: na Amazon já levam a sua tag;
+ * nas outras lojas são exemplos sem comissão até você colar o link de afiliado.
  */
+const AMAZON_TAG = "meulegadomasc-20";
 const qs = (q: string) => encodeURIComponent(q).replace(/%20/g, "+");
-const amz = (q: string) => `https://www.amazon.com.br/s?k=${qs(q)}&tag=meulegado-20`;
+const amz = (q: string) => `https://www.amazon.com.br/s?k=${qs(q)}&tag=${AMAZON_TAG}`;
 const ml = (q: string) => `https://lista.mercadolivre.com.br/${encodeURIComponent(q.replace(/\s+/g, "-"))}`;
 const kbm = (q: string) => `https://www.kabum.com.br/busca/${encodeURIComponent(q.replace(/\s+/g, "-"))}`;
 const shp = (q: string) => `https://shopee.com.br/search?keyword=${qs(q)}`;
@@ -92,59 +101,57 @@ export const products: Product[] = [
     title: "Grand Theft Auto VI para PS5",
     category: "jogos",
     store: "amazon",
-    price: 34990,
     image: "photo-1533106497176-45ae19e68ba2",
     imageAlt: "Fachada de hotel com letreiro de neon numa rua à noite",
-    rating: 4.9,
-    reviews: 2841,
     tags: ["gta6", "lancamento"],
-    summary: "A volta a Vice City, agora no estado de Leonida. Mídia física para PS5.",
-    highlights: ["Mídia física", "Lançado em 19/11/2026", "Legendas e menus em português"],
-    affiliateUrl: amz("grand theft auto vi ps5"),
+    summary: "A volta a Vice City, agora no estado de Leonida, no PS5.",
+    highlights: ["Para PlayStation 5", "Lançado em 19/11/2026", "Vendido e entregue pela Amazon ou parceiros"],
+    affiliateUrl: "https://link.amazon/B0djSTu1A",
   },
   {
     slug: "gta-vi-xbox",
     title: "Grand Theft Auto VI para Xbox Series X|S",
     category: "jogos",
     store: "amazon",
-    price: 34990,
     image: "photo-1589066724013-06f34f2cc17c",
     imageAlt: "Carros numa avenida iluminada entre prédios à noite",
-    rating: 4.9,
-    reviews: 1530,
     tags: ["gta6", "lancamento"],
     summary: "A mesma Leonida, no Xbox Series X ou Series S. Mídia física.",
     highlights: ["Mídia física", "Lançado em 19/11/2026", "Roda no Series X e Series S"],
     affiliateUrl: amz("grand theft auto vi xbox series"),
   },
   {
-    slug: "console-ps5-slim",
-    title: "Console PlayStation 5 Slim com leitor de disco",
+    slug: "console-ps5-digital",
+    title: "Console PlayStation 5 Edição Digital com controle",
     category: "jogos",
-    store: "mercadolivre",
-    price: 379900,
-    oldPrice: 429900,
-    image: "photo-1759493464913-014fdf4b4980",
-    imageAlt: "Logotipo PS5 iluminado à noite",
-    rating: 4.8,
-    reviews: 9120,
-    tags: ["gta6", "oferta"],
-    summary: "O console para jogar GTA VI no dia em que chega em casa.",
-    highlights: ["1 TB de armazenamento", "Leitor de disco", "Controle DualSense incluso"],
-    affiliateUrl: ml("playstation 5 slim"),
+    store: "amazon",
+    image: "photo-1622297845775-5ff3fef71d13",
+    imageAlt: "Console PlayStation 5 branco com controle",
+    tags: ["gta6"],
+    summary: "O console para jogar GTA VI. Edição digital: os jogos são comprados e baixados pela loja do PlayStation.",
+    highlights: ["Edição Digital, sem leitor de disco", "Controle DualSense incluso", "Roda GTA VI"],
+    affiliateUrl: "https://link.amazon/B0iVXWUE7",
+  },
+  {
+    slug: "console-xbox-series-s",
+    title: "Console Xbox Series S",
+    category: "jogos",
+    store: "amazon",
+    image: "photo-1604586376807-f73185cf5867",
+    imageAlt: "Controle de Xbox branco",
+    tags: ["gta6", "familia"],
+    summary: "O jeito mais compacto de jogar GTA VI no Xbox. Totalmente digital.",
+    highlights: ["Console digital, sem leitor de disco", "Compacto", "Roda GTA VI"],
+    affiliateUrl: "https://link.amazon/B0hQJQkzq",
   },
   {
     slug: "controle-dualsense",
     title: "Controle sem fio DualSense branco",
     category: "jogos",
     store: "amazon",
-    price: 44990,
-    oldPrice: 49990,
     image: "photo-1768166210760-9c9a4299c436",
     imageAlt: "Controle de videogame branco sobre fundo liso",
-    rating: 4.8,
-    reviews: 4310,
-    tags: ["oferta", "familia"],
+    tags: ["familia"],
     summary: "O segundo controle para jogar com o filho no sofá.",
     highlights: ["Gatilhos adaptáveis", "Bateria recarregável", "Microfone embutido"],
     affiliateUrl: amz("controle dualsense branco"),
@@ -234,11 +241,8 @@ export const products: Product[] = [
     title: "Vitrola retrô com Bluetooth e caixa de som",
     category: "nostalgia",
     store: "amazon",
-    price: 45900,
     image: "photo-1616714109948-c74fe5029a4d",
     imageAlt: "Disco de vinil âmbar girando no toca-discos",
-    rating: 4.6,
-    reviews: 1290,
     tags: ["presente-pai", "familia"],
     summary: "Os discos do seu pai tocando de novo na sala.",
     highlights: ["Toca 33, 45 e 78 rpm", "Bluetooth", "Caixa de som embutida"],
@@ -266,13 +270,9 @@ export const products: Product[] = [
     title: "Jaqueta de couro legítimo marrom",
     category: "roupas",
     store: "amazon",
-    price: 69900,
-    oldPrice: 89900,
     image: "photo-1700993443419-b6f067e734e4",
     imageAlt: "Homem vestindo jaqueta de couro marrom",
-    rating: 4.7,
-    reviews: 880,
-    tags: ["oferta"],
+    tags: [],
     summary: "Fica melhor a cada ano de uso. Um dia vai ser do seu filho.",
     highlights: ["Couro bovino legítimo", "Forro de algodão", "Do P ao GG"],
     affiliateUrl: amz("jaqueta couro masculina marrom"),
@@ -313,11 +313,8 @@ export const products: Product[] = [
     title: "Óculos de sol aviador com proteção UV400",
     category: "roupas",
     store: "amazon",
-    price: 22900,
     image: "photo-1589642380614-4a8c2147b857",
     imageAlt: "Óculos de sol estilo aviador com armação dourada",
-    rating: 4.5,
-    reviews: 1640,
     tags: ["gta6"],
     summary: "O acessório oficial de quem dirige pela orla de Vice City.",
     highlights: ["Proteção UV400", "Lentes polarizadas", "Estojo rígido"],
@@ -328,11 +325,8 @@ export const products: Product[] = [
     title: "Carteira de couro slim",
     category: "roupas",
     store: "amazon",
-    price: 12900,
     image: "photo-1775379557015-938546264440",
     imageAlt: "Carteiras de couro em vários tons arrumadas lado a lado",
-    rating: 4.7,
-    reviews: 3020,
     tags: ["presente-pai"],
     summary: "Fina no bolso, com espaço para a foto da família.",
     highlights: ["Couro legítimo", "Bloqueio RFID", "6 cartões e notas"],
@@ -345,13 +339,9 @@ export const products: Product[] = [
     title: "Relógio cronógrafo preto em aço",
     category: "relogios",
     store: "amazon",
-    price: 129000,
-    oldPrice: 159000,
     image: "photo-1542816340-4d3de5047cfd",
     imageAlt: "Relógio cronógrafo preto marcando 5h50",
-    rating: 4.8,
-    reviews: 720,
-    tags: ["presente-pai", "oferta"],
+    tags: ["presente-pai"],
     summary: "Mostrador limpo, caixa de aço. Feito para durar uma geração.",
     highlights: ["Resistente a 100 m", "Vidro de safira", "Caixa de 42 mm"],
     affiliateUrl: amz("relogio cronografo masculino aco preto"),
@@ -391,13 +381,9 @@ export const products: Product[] = [
     title: "Kit relógios pai e filho",
     category: "relogios",
     store: "amazon",
-    price: 49900,
-    oldPrice: 64900,
     image: "photo-1600003014755-ba31aa59c4b6",
     imageAlt: "Relógio analógico prata e dourado sobre uma superfície",
-    rating: 4.7,
-    reviews: 560,
-    tags: ["familia", "presente-pai", "oferta"],
+    tags: ["familia", "presente-pai"],
     summary: "Dois relógios iguais, um grande e um pequeno. O começo de uma tradição.",
     highlights: ["Dois relógios na caixa", "Pulseiras de aço", "Embalagem para presente"],
     affiliateUrl: amz("kit relogio pai e filho"),
@@ -425,11 +411,8 @@ export const products: Product[] = [
     title: "Notebook gamer com tela de 144 Hz",
     category: "computadores",
     store: "amazon",
-    price: 529900,
     image: "photo-1603302576837-37561b2e2302",
     imageAlt: "Notebook com tela colorida e teclado iluminado",
-    rating: 4.6,
-    reviews: 1410,
     tags: ["setup"],
     summary: "Joga à noite e trabalha de dia, na mesma mochila.",
     highlights: ["Tela de 15,6 polegadas a 144 Hz", "16 GB de RAM", "SSD de 512 GB"],
@@ -456,11 +439,8 @@ export const products: Product[] = [
     title: "Mouse gamer com sensor de 16.000 DPI",
     category: "computadores",
     store: "amazon",
-    price: 18900,
     image: "photo-1605773527852-c546a8584ea3",
     imageAlt: "Mouse com fio preto e vermelho",
-    rating: 4.6,
-    reviews: 4200,
     tags: ["setup"],
     summary: "Preciso, leve e com botões laterais que você vai usar.",
     highlights: ["16.000 DPI", "6 botões programáveis", "Cabo trançado"],
@@ -498,6 +478,9 @@ for (const p of products) {
   if (url.protocol !== "https:") throw new Error(`Link sem https: ${p.slug}`);
   if (!store || !store.hosts.includes(url.hostname)) {
     throw new Error(`Domínio ${url.hostname} não permitido para ${p.slug} (${p.store})`);
+  }
+  if (!store.manualPrices && (p.price || p.oldPrice || p.rating || p.reviews)) {
+    throw new Error(`${p.slug}: a ${store.name} não permite preço ou nota digitados à mão. Remova esses campos.`);
   }
 }
 

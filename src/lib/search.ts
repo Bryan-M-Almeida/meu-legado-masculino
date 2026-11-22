@@ -47,7 +47,7 @@ export const sortLabels: Record<SortKey, string> = {
 };
 
 export const discount = (p: Product) =>
-  p.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
+  p.oldPrice && p.price ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
 
 export function searchProducts(query: string, limit?: number) {
   const out = products

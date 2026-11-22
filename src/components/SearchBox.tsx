@@ -122,7 +122,7 @@ export function SearchBox() {
               >
                 <Image src={unsplash(p.image, 120)} alt="" width={44} height={44} className="photo size-11 object-cover border-2 border-ink" />
                 <span className="flex-1 min-w-0 truncate">{p.title}</span>
-                <span className="font-pixel shrink-0">{formatPrice(p.price)}</span>
+                <span className="font-pixel shrink-0">{p.price ? formatPrice(p.price) : "Ver preço"}</span>
               </li>
             ))
           )}
