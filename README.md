@@ -62,7 +62,7 @@ compartilhamento gerada para cada produto e manifesto do app.
 Depois de publicar:
 
 1. Entre no [Google Search Console](https://search.google.com/search-console) e adicione a propriedade
-   `https://meulegadomasculino.com.br` (opção "Prefixo do URL").
+   `https://www.meulegadomasculino.com.br` (opção "Prefixo do URL").
 2. Escolha a verificação por **tag HTML**, copie só o código do `content="..."` e salve na Vercel como variável de
    ambiente `GOOGLE_SITE_VERIFICATION`. Faça um novo deploy e clique em "Verificar".
    (Alternativa: verificação por DNS no Registro.br, que cobre o domínio inteiro.)
