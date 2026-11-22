@@ -52,3 +52,22 @@ npm start
 
 Recomendado: **Vercel** (plano gratuito atende). Importe o repositório, aponte o domínio `meulegadomasculino.com.br`
 nas configurações do projeto e ajuste o DNS no Registro.br conforme a Vercel indicar.
+
+## Aparecer no Google
+
+O site já sai pronto para indexação: `sitemap.xml` com todas as páginas e fotos, `robots.txt`, URL canônica em
+cada página, dados estruturados (organização, busca do site, trilha de navegação, produto e listas), imagem de
+compartilhamento gerada para cada produto e manifesto do app.
+
+Depois de publicar:
+
+1. Entre no [Google Search Console](https://search.google.com/search-console) e adicione a propriedade
+   `https://meulegadomasculino.com.br` (opção "Prefixo do URL").
+2. Escolha a verificação por **tag HTML**, copie só o código do `content="..."` e salve na Vercel como variável de
+   ambiente `GOOGLE_SITE_VERIFICATION`. Faça um novo deploy e clique em "Verificar".
+   (Alternativa: verificação por DNS no Registro.br, que cobre o domínio inteiro.)
+3. Em **Sitemaps**, envie `sitemap.xml`.
+4. Em **Inspeção de URL**, peça a indexação da home e da página `/gta-6` para acelerar.
+5. Quando criar as redes sociais da loja, adicione os links em `SITE.sameAs` (`src/lib/format.ts`).
+
+Para conferir os dados estruturados de uma página: [Teste de pesquisa aprimorada](https://search.google.com/test/rich-results).

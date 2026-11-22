@@ -2,12 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { breadcrumb, JsonLd } from "@/components/JsonLd";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductGrid } from "@/components/ProductCard";
 import { ProductSkeleton } from "@/components/Skeleton";
 import { getCategory, getProduct, getStore, products, tags, unsplash } from "@/data/catalog";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, SITE } from "@/lib/format";
 import { discount } from "@/lib/search";
+
+/** Corta no fim de uma palavra para a descrição caber no resultado do Google. */
+const clip = (text: string, max: number) => (text.length <= max ? text : `${text.slice(0, text.lastIndexOf(" ", max - 1))}…`);
 
 export function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
@@ -16,11 +20,12 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/produto/[slug]">): Promise<Metadata> {
   const p = getProduct((await params).slug);
   if (!p) return {};
+  const store = getStore(p.store).name;
   return {
     title: p.title,
-    description: p.summary,
+    description: clip(`${p.description} Veja o preço de hoje na ${store}.`, 158),
     alternates: { canonical: `/produto/${p.slug}` },
-    openGraph: { title: p.title, description: p.summary, images: p.image ? [unsplash(p.image, 1200)] : undefined },
+    openGraph: { type: "website", title: p.title, description: p.summary },
   };
 }
 
@@ -46,8 +51,26 @@ async function ProdutoContent({ params }: { params: PageProps<"/produto/[slug]">
     .sort((a, b) => shared(b) - shared(a))
     .slice(0, 4);
 
+  const ld = [
+    breadcrumb(SITE.url, [
+      ["Início", "/"],
+      [cat.name, `/categoria/${cat.slug}`],
+      [p.title, `/produto/${p.slug}`],
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: p.title,
+      description: p.description,
+      category: cat.name,
+      url: `${SITE.url}/produto/${p.slug}`,
+      image: p.image ? [unsplash(p.image, 1200)] : [`${SITE.url}/produto/${p.slug}/opengraph-image`],
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
+      <JsonLd data={ld} />
       <nav aria-label="Você está em" className="text-sm text-slate mb-6">
         <Link href="/" className="underline">Início</Link> /{" "}
         <Link href={`/categoria/${cat.slug}`} className="underline">{cat.name}</Link> / <span className="text-ink">{p.title}</span>

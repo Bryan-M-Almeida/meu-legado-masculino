@@ -37,7 +37,7 @@ export function ProductArt({
         alt={p.imageAlt ?? p.title}
         fill
         sizes={sizes}
-        priority={priority}
+        preload={priority}
         className={`photo ${compact ? photoFit(p.image).replace("p-[6%]", "p-0.5") : photoFit(p.image)}`}
       />
     );

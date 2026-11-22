@@ -28,7 +28,7 @@ export default function GtaPage() {
           src={unsplash("photo-1535392432937-a27c36ec07b5", 1800)}
           alt="Coqueiros vistos de baixo contra o céu do pôr do sol"
           fill
-          priority
+          preload
           sizes="100vw"
           className="photo object-cover"
         />

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Atkinson_Hyperlegible, Pixelify_Sans } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { JsonLd } from "@/components/JsonLd";
 import { SITE } from "@/lib/format";
 import "./globals.css";
 
@@ -12,9 +13,42 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: { default: `${SITE.name} | Para que seu legado seja lendário`, template: `%s | ${SITE.name}` },
   description: SITE.description,
+  applicationName: SITE.name,
+  category: "shopping",
   openGraph: { type: "website", locale: "pt_BR", siteName: SITE.name, url: SITE.url },
-  robots: { index: true, follow: true },
+  twitter: { card: "summary_large_image" },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  formatDetection: { telephone: false, email: false, address: false },
+  // Código do Google Search Console: defina GOOGLE_SITE_VERIFICATION no painel da Vercel.
+  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
 };
+
+const siteLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${SITE.url}/#org`,
+    name: SITE.name,
+    url: SITE.url,
+    logo: `${SITE.url}/icon.svg`,
+    slogan: "Para que seu legado seja lendário",
+    ...(SITE.sameAs.length ? { sameAs: SITE.sameAs } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${SITE.url}/#site`,
+    name: SITE.name,
+    url: SITE.url,
+    inLanguage: "pt-BR",
+    publisher: { "@id": `${SITE.url}/#org` },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: { "@type": "EntryPoint", urlTemplate: `${SITE.url}/produtos?q={search_term_string}` },
+      "query-input": "required name=search_term_string",
+    },
+  },
+];
 
 export const viewport: Viewport = { themeColor: "#1a1c2c" };
 
@@ -30,6 +64,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
         <Footer />
+        <JsonLd data={siteLd} />
       </body>
     </html>
   );

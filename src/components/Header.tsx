@@ -8,11 +8,12 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 bg-ink text-paper border-b-[3px] border-ink">
       <div className="mx-auto max-w-7xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-3">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Meu Legado Masculino, página inicial">
+        <Link href="/" className="flex items-center gap-2.5 shrink-0">
           <MascotHead scale={2} />
           <span className="font-pixel text-lg leading-none text-gold">
             Meu Legado
             <span className="block text-paper text-[0.95rem]">Masculino</span>
+            <span className="sr-only">, página inicial</span>
           </span>
         </Link>
 

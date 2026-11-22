@@ -159,6 +159,7 @@ export function CatalogExplorer({ lockedCategory }: { lockedCategory?: CategoryS
       </aside>
 
       <section aria-labelledby="resultado" aria-busy={pending}>
+        <h2 className="sr-only">Lista de produtos</h2>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <p id="resultado" role="status" className="text-slate">
             {results.length === 1 ? "1 produto" : `${results.length} produtos`}

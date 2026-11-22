@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { categories, getProduct, products, unsplash, type Product } from "@/data/catalog";
@@ -6,6 +7,8 @@ import { Mascot } from "@/components/Mascot";
 import { PixelIcon, type IconName } from "@/components/PixelIcon";
 import { ProductArt } from "@/components/ProductArt";
 import { ProductGrid } from "@/components/ProductCard";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const values: { icon: IconName; name: string; text: string }[] = [
   { icon: "crown", name: "Legado", text: "O que você compra hoje pode estar no pulso do seu filho daqui a 30 anos." },

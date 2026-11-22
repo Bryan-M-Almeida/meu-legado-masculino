@@ -73,7 +73,7 @@ export function ProductGallery({ product }: { product: Product }) {
               src={unsplash(photo.id, 1200)}
               alt={photo.alt}
               fill
-              priority={index === 0}
+              preload={index === 0}
               sizes="(min-width: 768px) 50vw, 100vw"
               className={`photo ${photoFit(photo.id)}`}
             />

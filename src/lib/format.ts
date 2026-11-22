@@ -6,5 +6,7 @@ export const SITE = {
   name: "Meu Legado Masculino",
   url: "https://meulegadomasculino.com.br",
   description:
-    "Jogos, nostalgia, roupas, relógios e computadores escolhidos a dedo. Para que seu legado seja lendário.",
+    "Loja de achados para homens e famílias: jogos e consoles, GTA VI, fliperamas e itens retrô, roupas, relógios, PCs gamer e peças. Compre direto na Amazon.",
+  /** Usado no Google para ligar o site à marca. Preencha quando criar as redes sociais. */
+  sameAs: [] as string[],
 };
