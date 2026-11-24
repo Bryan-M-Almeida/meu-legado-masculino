@@ -71,6 +71,15 @@ async function CategoriaContent({ params }: { params: PageProps<"/categoria/[slu
           <p className="mt-2 text-charcoal">{cat.blurb}</p>
         </div>
       </div>
+      {cat.slug === "computadores" && (
+        <Link href="/monte-seu-pc" className="product-card mb-8 flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
+          <span>
+            <span className="product-title font-pixel text-xl block">Monte seu PC peça por peça</span>
+            <span className="text-charcoal">Escolha as peças e veja na hora se tudo encaixa.</span>
+          </span>
+          <span className="px-btn px-btn-gold !py-1.5" aria-hidden>Montar ▶</span>
+        </Link>
+      )}
       <Suspense fallback={<ProductGrid items={items} priorityCount={4} />}>
         <CatalogExplorer lockedCategory={cat.slug} />
       </Suspense>

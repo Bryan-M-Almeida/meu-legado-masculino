@@ -90,6 +90,18 @@ async function GuiaContent({ params }: { params: PageProps<"/guias/[slug]">["par
           ))}
         </div>
 
+        {g.cta && (
+          <Link href={g.cta.href} className="product-card mt-8 flex flex-wrap items-center justify-between gap-3 p-5">
+            <span>
+              <span className="product-title font-pixel text-xl block">{g.cta.title}</span>
+              <span className="text-charcoal">{g.cta.text}</span>
+            </span>
+            <span className="px-btn px-btn-gold !py-1.5" aria-hidden>
+              {g.cta.button} ▶
+            </span>
+          </Link>
+        )}
+
         <nav aria-labelledby="indice" className="mt-10 px-frame p-5 sm:p-6">
           <h2 id="indice" className="font-pixel text-xl">Neste guia</h2>
           <ol className="mt-3 space-y-1.5 list-decimal pl-6">

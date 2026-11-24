@@ -40,6 +40,11 @@ export function Header() {
                 Guias
               </Link>
             </li>
+            <li className="hidden md:block">
+              <Link href="/monte-seu-pc" className="block px-3 py-2 hover:text-gold">
+                Monte seu PC
+              </Link>
+            </li>
             <li className="hidden sm:block">
               <Link href="/sobre" className="block px-3 py-2 hover:text-gold">
                 O legado

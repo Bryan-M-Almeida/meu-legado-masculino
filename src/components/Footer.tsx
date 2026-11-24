@@ -38,6 +38,7 @@ export function Footer() {
           <ul className="space-y-1.5 text-[0.95rem]">
             <li><Link href="/gta-6" className="hover:text-gold">Especial GTA VI</Link></li>
             <li><Link href="/guias" className="hover:text-gold">Guias de compra</Link></li>
+            <li><Link href="/monte-seu-pc" className="hover:text-gold">Monte seu PC</Link></li>
             <li><Link href="/sobre" className="hover:text-gold">O legado</Link></li>
             <li><Link href="/sobre#afiliados" className="hover:text-gold">Como ganhamos dinheiro</Link></li>
           </ul>

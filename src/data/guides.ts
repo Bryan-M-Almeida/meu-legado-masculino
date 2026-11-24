@@ -29,6 +29,8 @@ export interface Guide {
   /** Data da última revisão, AAAA-MM-DD. */
   updated: string;
   intro: string[];
+  /** Chamada opcional para uma ferramenta do site, logo depois da introdução. */
+  cta?: { href: string; title: string; text: string; button: string };
   sections: GuideSection[];
   faq: { q: string; a: string }[];
 }
@@ -196,6 +198,12 @@ export const guides: Guide[] = [
       "Montar o próprio PC costuma render mais desempenho pelo mesmo dinheiro do que comprar pronto, e deixa espaço para trocar peças depois. O segredo é gastar onde importa (placa de vídeo) e não errar a compatibilidade entre processador, placa-mãe e memória.",
       "Este guia segue a plataforma AM4 da AMD, que ainda tem o melhor custo-benefício: peças baratas, maduras e fáceis de achar.",
     ],
+    cta: {
+      href: "/monte-seu-pc",
+      title: "Prefere montar na prática?",
+      text: "No Monte seu PC você escolhe as peças e vê na hora o que encaixa, com a fonte calculada pelo consumo.",
+      button: "Montar meu PC",
+    },
     sections: [
       {
         heading: "1. Placa de vídeo: onde vai a maior parte do orçamento",
