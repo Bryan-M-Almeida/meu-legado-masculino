@@ -7,6 +7,8 @@ import { Mascot } from "@/components/Mascot";
 import { PixelIcon, type IconName } from "@/components/PixelIcon";
 import { ProductArt } from "@/components/ProductArt";
 import { ProductGrid } from "@/components/ProductCard";
+import { GuideList } from "@/components/GuideList";
+import { guides } from "@/data/guides";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
@@ -131,6 +133,17 @@ export default function Home() {
           </Link>
         </div>
         <ProductGrid items={featured} />
+      </section>
+
+      {/* ── Guias ── */}
+      <section aria-labelledby="guides-title" className="mx-auto max-w-7xl px-4 mt-20">
+        <div className="flex items-end justify-between gap-4 mb-5">
+          <h2 id="guides-title" className="font-pixel text-3xl">Antes de comprar</h2>
+          <Link href="/guias" className="text-blue font-bold underline underline-offset-4 shrink-0">
+            Todos os guias
+          </Link>
+        </div>
+        <GuideList items={guides.slice(0, 4)} />
       </section>
 
       {/* ── Família ── */}

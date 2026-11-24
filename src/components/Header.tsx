@@ -35,6 +35,11 @@ export function Header() {
                 Produtos
               </Link>
             </li>
+            <li>
+              <Link href="/guias" className="block px-3 py-2 hover:text-gold">
+                Guias
+              </Link>
+            </li>
             <li className="hidden sm:block">
               <Link href="/sobre" className="block px-3 py-2 hover:text-gold">
                 O legado
