@@ -10,3 +10,13 @@ export const SITE = {
   /** Usado no Google para ligar o site à marca. Preencha quando criar as redes sociais. */
   sameAs: [] as string[],
 };
+
+/**
+ * Faixa de campanha no topo de todas as páginas. Para tirar do ar quando a
+ * campanha acabar, troque por `null` e publique de novo.
+ */
+export const PROMO: { href: string; label: string; cta: string } | null = {
+  href: "/black-friday",
+  label: "Black Friday 2026: o que vale a pena comprar",
+  cta: "Ver seleção",
+};

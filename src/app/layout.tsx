@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Atkinson_Hyperlegible, Pixelify_Sans } from "next/font/google";
 import { Header } from "@/components/Header";
@@ -65,6 +66,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
         <Footer />
         <JsonLd data={siteLd} />
+        {/* Contagem anônima de visitas, sem cookies (Vercel Web Analytics) */}
+        <Analytics />
       </body>
     </html>
   );

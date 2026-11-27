@@ -49,7 +49,10 @@ export default function SobrePage() {
             a loja pode nos pagar uma comissão.
           </li>
           <li>Você paga o mesmo preço. Pagamento, entrega, troca e garantia são da loja.</li>
-          <li>Não pedimos cadastro, não usamos cookies de rastreamento e não coletamos seus dados neste site.</li>
+          <li>
+            Não pedimos cadastro, não usamos cookies de rastreamento e não coletamos seus dados. Contamos as visitas de forma anônima
+            (Vercel Web Analytics, sem cookies e sem identificar você) só para saber quais páginas ajudam mais.
+          </li>
         </ul>
       </section>
 

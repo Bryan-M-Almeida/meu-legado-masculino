@@ -1,11 +1,21 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { categories } from "@/data/catalog";
+import { PROMO } from "@/lib/format";
 import { MascotHead } from "./Mascot";
 import { SearchBox } from "./SearchBox";
 
 export function Header() {
   return (
+    <>
+    {PROMO && (
+      <Link href={PROMO.href} className="block bg-gold text-ink border-b-[3px] border-ink hover:bg-sunset">
+        <span className="mx-auto max-w-7xl px-4 py-1.5 flex items-center justify-center gap-3 text-sm font-bold">
+          <span>{PROMO.label}</span>
+          <span className="font-pixel underline underline-offset-2 shrink-0">{PROMO.cta} ▶</span>
+        </span>
+      </Link>
+    )}
     <header className="sticky top-0 z-40 bg-ink text-paper border-b-[3px] border-ink">
       <div className="mx-auto max-w-7xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-3">
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
@@ -66,5 +76,6 @@ export function Header() {
         </ul>
       </nav>
     </header>
+    </>
   );
 }

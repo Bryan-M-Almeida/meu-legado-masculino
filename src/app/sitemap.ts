@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("", 1),
     page("/produtos", 0.9),
     page("/gta-6", 0.9),
+    page("/black-friday", 0.9),
     page("/guias", 0.8),
     page("/monte-seu-pc", 0.8),
     ...guides.map((g) => ({ ...page(`/guias/${g.slug}`, 0.8), lastModified: new Date(`${g.updated}T12:00:00Z`) })),
